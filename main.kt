@@ -21,18 +21,12 @@ fun main(){
     val deck = getDeck()
 
     // Get players.
-    val player1 = Player("Stan")
+    val player1 = Player("You")
     val player2 = Player("Hal")
     val players = listOf(player1, player2)
 
     // Start the game.
     val game = Game(deck, players)
     game.dealCards()
-
-    println("----${player1.name}'s cards: -----------")
-    player1.showHand()
-    println("----${player2.name}'s cards: -----------")
-    player2.showHand()
-    println(deck.size)
-
+    game.printYourHandAndTrump()
 }

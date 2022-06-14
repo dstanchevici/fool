@@ -1,8 +1,6 @@
 package fool
 
 class Game(val deck: MutableList<Card>, val players: List<Player>) {
-
-    // Maintain the number of cards for every player at least 6 cards
     fun dealCards() {
         for (player in players){
             while (player.hand.size < 6){
@@ -15,4 +13,20 @@ class Game(val deck: MutableList<Card>, val players: List<Player>) {
             }
         }
     }
+    fun getTrumps(): Card {
+        val trumpCard = deck.first()
+        deck.removeFirst()
+        deck.add(trumpCard)
+        return trumpCard
+    }
+    fun printYourHandAndTrump(){
+        val trumpCard = getTrumps()
+        repeat(10) {print("*   ")}
+        println("\nThe trumps are the ${trumpCard.suit.uppercase()}, and your current hand includes")
+        players.first().showHand()
+        repeat(10) {print("*   ")}
+        println()
+    }
+
+    fun playRound(){}
 }

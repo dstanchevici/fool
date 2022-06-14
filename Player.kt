@@ -3,7 +3,9 @@ package fool
 class Player (val name: String, val hand: MutableList<Card> = mutableListOf<Card>()){
 
     fun showHand(){
-        hand.forEach { println("[${it.rank} of ${it.suit}]") }
+        for ((index, value) in hand.withIndex()){
+            println("${index + 1}. $value")
+        }
     }
 
     fun countCards(hand: MutableList<Card>) = hand.size
