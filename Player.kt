@@ -7,6 +7,4 @@ class Player (val name: String, val hand: MutableList<Card> = mutableListOf<Card
             println("${index + 1}. $value")
         }
     }
-
-    fun countCards(hand: MutableList<Card>) = hand.size
 }
