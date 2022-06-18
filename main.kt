@@ -5,7 +5,7 @@ fun main(){
     // Get players.
     val sam = Player("Sam")
     val hal = Player("Hal")
-    val players = listOf(sam, hal)
+    val players = arrayOf(sam, hal)
 
     // Start game.
     val game = Game(players)
