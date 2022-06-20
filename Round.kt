@@ -1,9 +1,9 @@
 package fool
 
-class Round(val deck: MutableList<Card>, val players: List<Player>) {
+class Round(private val players: List<Player>, private val turnUp: Card) {
     fun printRound(){
         println("\n*  *  *  THIS ROUND  *  *  * \n")
-        println("\n*  *  *  TURNUP: ${deck.last()}  *  *  * \n")
+        println("\n*  *  *  TURNUP:   *  *  * \n")
         println("\nYOUR CURRENT HAND:")
         players.first().showHand()
         println()

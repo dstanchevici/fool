@@ -4,8 +4,11 @@ package fool
 data class MyPlayer(val name: String, val numbers: IntArray)
 
 
+/*
 private fun findFirstPlayer2(players: List<MyPlayer>): MyPlayer?  =
     players.sortedBy { it.numbers.minOf { it } } . firstOrNull()
+
+
 
 private fun findFirstPlayer(players: List<MyPlayer>): MyPlayer?  {
     var lowestNumber = 0
@@ -22,21 +25,18 @@ private fun findFirstPlayer(players: List<MyPlayer>): MyPlayer?  {
     return firstPLayer
 }
 
+ */
+
 
 fun main(){
-    val players = listOf(
-        MyPlayer("Petya", intArrayOf(9, 3, 2, 6)),
-        MyPlayer("Vasya", intArrayOf(1, 7, 10, 22))
-    )
-
-    /*
     // Get players.
-    val sam = Player("Sam")
-    val hal = Player("Hal")
-    val players = listOf(sam, hal)
+    val players = listOf(
+        Player("Sam"),
+        Player("Hal")
+    )
 
     // Start game.
     val game = Game(players)
     game.play()
-*/
+
 }

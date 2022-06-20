@@ -2,10 +2,7 @@ package fool
 
 import kotlin.random.Random
 
-
-class Game(val players: List<Player>) {
-    private val deck = createDeck()
-
+class Game(private val players: List<Player>) {
     private fun createDeck(): MutableList<Card>{
         val suits = listOf("S", "C", "H", "D")
         val deck = mutableListOf<Card>()
@@ -39,100 +36,32 @@ class Game(val players: List<Player>) {
         var attacker: Player? = null
 
         for (p in players){
-            for (card in p.hand){
-                if (card.suit == trump && card.rank < lowestTrump){
-                    lowestTrump = card.rank
+            val pTrumps = p.hand.filter { it.suit == trump }
+            pTrumps.forEach{
+                if (it.rank < lowestTrump){
+                    lowestTrump = it.rank
                     attacker = p
                 }
             }
-
         }
-        println("Lowest trump in hands: $lowestTrump of $trump")
         return attacker
     }
+
+    private val deck = createDeck()
 
     fun play(){
         dealCards()
         val turnUp = deck.last()
-        println("Turnup: $turnUp")
-        deck.forEach { println(it) }
 
-        println("\n${players[0].name}'s Cards:")
-        players[0].showHand()
+        val firstAttacker = findFirstAttacker(turnUp.suit)
+        if (firstAttacker != null)
+            println("First attacker is ${firstAttacker.name}")
+        else{
+            val randomAttackerIndex = Random.nextInt(0, players.size)
+            println("No trumps in hands. The first attacker is chosen randomly. It is ${players[randomAttackerIndex].name}")
+        }
 
-        println("\n${players[1].name}'s Cards:")
-        players[1].showHand()
-
-        val attacker = findFirstAttacker(turnUp.suit)
-        if (attacker != null)
-            println("First attacker is ${attacker.name}")
-        else
-            println("No trumps in hands")
-
+        val round = Round(players, turnUp)
     }
 }
 
-// test
-fun main(){
-    // Get players.
-    val sam = Player("Sam")
-    val hal = Player("Hal")
-    val players = listOf(sam, hal)
-
-    // Start game.
-    val game = Game(players)
-    game.play()
-}
-
-/*
-    private fun findFirstAttacker(trump: String): Player{
-        val lowestTrumps = Array<Card?>(players.size) {null}
-
-        for (i in players.indices){
-            var playerLowestTrump: Card? = null
-
-            for (card in players[i].hand){
-                if (playerLowestTrump == null && card.suit == trump){
-                    playerLowestTrump = card
-                }
-
-                if (playerLowestTrump != null && card.suit == trump){
-                    if (card.rank < playerLowestTrump.rank)
-                        playerLowestTrump = card
-                }
-            }
-
-            lowestTrumps[i] = playerLowestTrump
-        }
-
-        // Print to check
-        println("Lowest Trumps AFTER CALCULATION: ")
-        lowestTrumps.forEach { print(it) }
-        println("\n")
-        // So far ok.
-
-        var lowestRank = 14
-        var indexOfSmallestTrump = 0
-        var noTrumps = true
-        for (i in 0 until lowestTrumps.size){
-            if (lowestTrumps[i] == null){
-                continue
-            } else {
-                noTrumps = false
-                if (lowestTrumps[i]!!.rank <= lowestRank){
-                    indexOfSmallestTrump = i
-                    lowestRank = lowestTrumps[i]!!.rank
-                }
-            }
-
-        }
-
-        if (noTrumps){
-            println("No trumps on hands found. The first attacker is chosen randomly.")
-            return players[Random.nextInt(0, players.size)]
-        }
-
-        println("The smallest Trump at the start of game is: ${lowestTrumps[indexOfSmallestTrump]}")
-        return players[indexOfSmallestTrump]
-    }
- */
