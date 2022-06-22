@@ -2,7 +2,7 @@ package fool
 
 import kotlin.random.Random
 
-class Game(private val players: List<Player>) {
+class Game(private val players: Array<Player>) {
     private fun createDeck(): MutableList<Card>{
         val suits = listOf("S", "C", "H", "D")
         val deck = mutableListOf<Card>()
@@ -18,6 +18,9 @@ class Game(private val players: List<Player>) {
         return deck
     }
 
+    private val deck = createDeck()
+    private val turnUp = deck.last()
+
     private fun dealCards() {
         for (player in players){
             while (player.hand.size < 6){
@@ -31,37 +34,83 @@ class Game(private val players: List<Player>) {
         }
     }
 
-    private fun findFirstAttacker(trump: String): Player?{
+    private fun findFirstAttackerIndex(): Int?{
+        val trump = turnUp.suit
         var lowestTrump = 14
-        var attacker: Player? = null
+        var attackerIndex: Int? = null
 
-        for (p in players){
-            val pTrumps = p.hand.filter { it.suit == trump }
+        for (i in players.indices){
+            val pTrumps = players[i].hand.filter { it.suit == trump }
             pTrumps.forEach{
                 if (it.rank < lowestTrump){
                     lowestTrump = it.rank
-                    attacker = p
+                    attackerIndex = i
                 }
             }
         }
-        return attacker
+        return attackerIndex
     }
 
-    private val deck = createDeck()
+    private fun printTable(attacker: Player, defender: Player, playedCards: MutableList<Card>){
+        repeat(29) {print("* ")}
+        println()
+        println()
+
+        println("ATTACKER ${attacker.name}'s current hand:")
+        attacker.showHand()
+        println()
+
+        println("DEFENDER ${defender.name}'s current hand:")
+        attacker.showHand()
+        println()
+
+        if (playedCards.isEmpty()){
+            println("No cards have been played yet.")
+        } else {
+            println("ATTACKER PLAYS: \tDEFENDER COVERS WITH:")
+            var counter = 1
+            for (card in playedCards){
+                if (counter % 2 != 0){
+                    print("$card\t\t\t")
+                    counter++
+                } else{
+                    print("$card\n")
+                    counter++
+                }
+
+            }
+        }
+
+        println()
+        repeat(10) {print("* ")}
+        print("TURNUP: $turnUp ")
+        repeat(11) {print("* ")}
+        println()
+    }
+
+    private fun playRound(attackerIndex: Int): Int {
+        val defenderIndex = if (attackerIndex < players.lastIndex) attackerIndex+1 else 0
+        val attacker = players[attackerIndex]
+        val defender = players[defenderIndex]
+        val playedCards = mutableListOf<Card>(Card(6, "S"), Card (7, "S"), Card(6, "H"), Card(7, "H"), Card(6, "D"))
+
+        //while (true){
+            printTable(attacker, defender, playedCards)
+        //}
+
+        return 0
+    }
 
     fun play(){
         dealCards()
-        val turnUp = deck.last()
+        var firstAttackerIndex = findFirstAttackerIndex()
+        if (firstAttackerIndex == null)
+            firstAttackerIndex = Random.nextInt(0, players.size)
 
-        val firstAttacker = findFirstAttacker(turnUp.suit)
-        if (firstAttacker != null)
-            println("First attacker is ${firstAttacker.name}")
-        else{
-            val randomAttackerIndex = Random.nextInt(0, players.size)
-            println("No trumps in hands. The first attacker is chosen randomly. It is ${players[randomAttackerIndex].name}")
-        }
+        var nextAttacker = playRound(firstAttackerIndex)
 
-        val round = Round(players, turnUp)
     }
+
+    operator fun invoke() { play() }
 }
 
