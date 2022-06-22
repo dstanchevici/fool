@@ -86,6 +86,20 @@ class Game(private val players: Array<Player>) {
         print("TURNUP: $turnUp ")
         repeat(11) {print("* ")}
         println()
+        println()
+    }
+
+    private fun getInput(player: Player): Int {
+        println("${player.name}, choose a card from your hand by entering its index number: ")
+        var cardNumberString = readln()
+
+        // cardNumberInt !in 1..player.hand.lastIndex+1
+        while (cardNumberString.contains("""\D""".toRegex()) || cardNumberString.trim().toInt() !in 1..player.hand.lastIndex+1){
+            println("Please double check and try again.")
+            cardNumberString = readln()
+        }
+
+        return cardNumberString.trim().toInt() - 1
     }
 
     private fun playRound(attackerIndex: Int): Int {
@@ -94,9 +108,9 @@ class Game(private val players: Array<Player>) {
         val defender = players[defenderIndex]
         val playedCards = mutableListOf<Card>(Card(6, "S"), Card (7, "S"), Card(6, "H"), Card(7, "H"), Card(6, "D"))
 
-        //while (true){
-            printTable(attacker, defender, playedCards)
-        //}
+        printTable(attacker, defender, playedCards)
+        val attackerMove = getInput(attacker)
+        println("${attacker.name} is playing ${attacker.hand[attackerMove]}")
 
         return 0
     }
