@@ -61,7 +61,7 @@ class Game(private val players: Array<Player>) {
         println()
 
         println("DEFENDER ${defender.name}'s current hand:")
-        attacker.showHand()
+        defender.showHand()
         println()
 
         if (playedCards.isEmpty()){
@@ -89,7 +89,7 @@ class Game(private val players: Array<Player>) {
         println()
     }
 
-    private fun getInput(player: Player): Int {
+    private fun getInput(player: Player): Card {
         println("${player.name}, choose a card from your hand by entering its index number: ")
         var cardNumberString = readln()
 
@@ -99,18 +99,21 @@ class Game(private val players: Array<Player>) {
             cardNumberString = readln()
         }
 
-        return cardNumberString.trim().toInt() - 1
+        return player.hand[cardNumberString.trim().toInt() - 1]
     }
 
     private fun playRound(attackerIndex: Int): Int {
         val defenderIndex = if (attackerIndex < players.lastIndex) attackerIndex+1 else 0
         val attacker = players[attackerIndex]
         val defender = players[defenderIndex]
-        val playedCards = mutableListOf<Card>(Card(6, "S"), Card (7, "S"), Card(6, "H"), Card(7, "H"), Card(6, "D"))
+        val playedCards = mutableListOf<Card>()
 
         printTable(attacker, defender, playedCards)
-        val attackerMove = getInput(attacker)
-        println("${attacker.name} is playing ${attacker.hand[attackerMove]}")
+        val attackerCard = getInput(attacker)
+        playedCards.add(attackerCard)
+        attacker.hand.remove(attackerCard)
+        printTable(attacker, defender, playedCards)
+
 
         return 0
     }
