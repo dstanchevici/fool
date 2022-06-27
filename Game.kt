@@ -52,7 +52,7 @@ class Game(private val players: Array<Player>) {
     }
 
     private fun printTable(attacker: Player, defender: Player, playedCards: MutableList<Card>){
-        repeat(29) {print("* ")}
+        repeat(760) {print("* ")}
         println()
         println()
 
@@ -84,7 +84,7 @@ class Game(private val players: Array<Player>) {
         println()
         repeat(10) {print("* ")}
         print("TURNUP: $turnUp ")
-        repeat(11) {print("* ")}
+        repeat(50) {print("* ")}
         println()
         println()
     }
@@ -111,6 +111,14 @@ class Game(private val players: Array<Player>) {
         return false
     }
 
+    private fun checkIfDefenderCardIsPlayable(attackerCard: Card, defenderCard: Card): Boolean{
+        val trumpSuit = turnUp.suit
+        return (
+                defenderCard.suit == attackerCard.suit && defenderCard.rank > attackerCard.rank ||
+                defenderCard.suit == trumpSuit && attackerCard.suit != trumpSuit
+                )
+    }
+
     private fun playRound(attackerIndex: Int): Int {
         val defenderIndex = if (attackerIndex < players.lastIndex) attackerIndex+1 else 0
         val attacker = players[attackerIndex]
@@ -124,7 +132,7 @@ class Game(private val players: Array<Player>) {
             var isAttackerCardPlayable = checkIfAttackerCardIsPlayable(attackerCard, playedCards)
 
             while (isAttackerCardPlayable == false){
-                println("${attacker.name}, you can't attack with $attackerCard. Please choose a suitable card.")
+                println("${attacker.name}, you can't attack with $attackerCard. Try again.")
                 attackerCard = getInput(attacker)
                 isAttackerCardPlayable = checkIfAttackerCardIsPlayable(attackerCard, playedCards)
             }
@@ -134,7 +142,15 @@ class Game(private val players: Array<Player>) {
 
             // Defender's move
             printTable(attacker, defender, playedCards)
-            val defenderCard = getInput(defender)
+            var defenderCard = getInput(defender)
+            var isDefenderCardPlayable = checkIfDefenderCardIsPlayable(attackerCard, defenderCard)
+
+            while (isDefenderCardPlayable == false){
+                println("${defender.name}, you can't cover $attackerCard with $defenderCard. Try again.")
+                defenderCard = getInput(defender)
+                isDefenderCardPlayable = checkIfDefenderCardIsPlayable(attackerCard, defenderCard)
+            }
+
             playedCards.add(defenderCard)
             defender.hand.remove(defenderCard)
 
