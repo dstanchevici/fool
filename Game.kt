@@ -52,8 +52,11 @@ class Game(private val players: Array<Player>) {
     }
 
     private fun printTable(attacker: Player, defender: Player, playedCards: MutableList<Card>){
-        repeat(760) {print("* ")}
+        repeat(30) {print("* ")}
         println()
+        repeat(10){print(" ")}
+        println("TURNUP: $turnUp ")
+        repeat(30) {print("* ")}
         println()
 
         println("ATTACKER ${attacker.name}'s current hand:")
@@ -83,22 +86,22 @@ class Game(private val players: Array<Player>) {
 
         println()
         repeat(10) {print("* ")}
-        print("TURNUP: $turnUp ")
-        repeat(50) {print("* ")}
         println()
         println()
     }
 
-    private fun getInput(player: Player): Card {
-        println("${player.name}, choose a card from your hand by entering its index number: ")
-        var cardNumberString = readln()
+    private fun getInput(player: Player): Card? {
+        println("${player.name}, choose a card from your hand by entering its index number. Or type 's' to stop the attack. ")
+        var inputString = readln()
 
-        while (cardNumberString.contains("""\D""".toRegex()) || cardNumberString.trim().toInt() !in 1..player.hand.lastIndex+1){
+        if (inputString.trim() == "s")
+            return null
+
+        while (inputString.contains("""\D""".toRegex()) || inputString.trim().toInt() !in 1..player.hand.lastIndex+1){
             println("Please double check and try again.")
-            cardNumberString = readln()
+            inputString = readln()
         }
-
-        return player.hand[cardNumberString.trim().toInt() - 1]
+        return player.hand[inputString.trim().toInt() - 1]
     }
 
     private fun checkIfAttackerCardIsPlayable(attackerCard: Card, playedCards: MutableList<Card>): Boolean{
@@ -125,33 +128,33 @@ class Game(private val players: Array<Player>) {
         val defender = players[defenderIndex]
         val playedCards = mutableListOf<Card>()
 
-        while (true){
+        while (attacker.hand.isNotEmpty() || defender.hand.isNotEmpty()){
             // Attacker's move
             printTable(attacker, defender, playedCards)
-            var attackerCard = getInput(attacker)
-            var isAttackerCardPlayable = checkIfAttackerCardIsPlayable(attackerCard, playedCards)
+            var attackerCard: Card? = getInput(attacker) ?: return if (attackerIndex < players.lastIndex) attackerIndex+1 else 0
+            var isAttackerCardPlayable = checkIfAttackerCardIsPlayable(attackerCard!!, playedCards)
 
             while (isAttackerCardPlayable == false){
                 println("${attacker.name}, you can't attack with $attackerCard. Try again.")
-                attackerCard = getInput(attacker)
+                attackerCard = getInput(attacker)?: return if (attackerIndex < players.lastIndex) attackerIndex+1 else 0
                 isAttackerCardPlayable = checkIfAttackerCardIsPlayable(attackerCard, playedCards)
             }
 
-            playedCards.add(attackerCard)
+            playedCards.add(attackerCard!!)
             attacker.hand.remove(attackerCard)
 
             // Defender's move
             printTable(attacker, defender, playedCards)
-            var defenderCard = getInput(defender)
-            var isDefenderCardPlayable = checkIfDefenderCardIsPlayable(attackerCard, defenderCard)
+            var defenderCard: Card? = getInput(defender) ?: return if (defenderIndex < players.lastIndex) defenderIndex+1 else 0
+            var isDefenderCardPlayable = checkIfDefenderCardIsPlayable(attackerCard, defenderCard!!)
 
             while (isDefenderCardPlayable == false){
                 println("${defender.name}, you can't cover $attackerCard with $defenderCard. Try again.")
-                defenderCard = getInput(defender)
+                defenderCard = getInput(defender) ?: return if (defenderIndex < players.lastIndex) defenderIndex+1 else 0
                 isDefenderCardPlayable = checkIfDefenderCardIsPlayable(attackerCard, defenderCard)
             }
 
-            playedCards.add(defenderCard)
+            playedCards.add(defenderCard!!)
             defender.hand.remove(defenderCard)
 
             printTable(attacker, defender, playedCards)
