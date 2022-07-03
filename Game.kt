@@ -135,12 +135,19 @@ class Game(private val players: Array<Player>) {
             // Attacker's move
             var attackerCard: Card?
             while (true){
-                attackerCard = getInput(attacker) ?: return defenderIndex
-                if (attackerCardIsPlayable(attackerCard!!, playedCards)){
-                    playedCards.add(attackerCard!!)
+                attackerCard = getInput(attacker)
+
+                if (attackerCard == null){
+                    playedCards.clear()
+                    return defenderIndex
+                }
+
+                if (attackerCardIsPlayable(attackerCard, playedCards)){
+                    playedCards.add(attackerCard)
                     attacker.hand.remove(attackerCard)
                     break
                 }
+
                 println("You can't attack with $attackerCard. Try again.")
             }
 
@@ -149,19 +156,25 @@ class Game(private val players: Array<Player>) {
             // Defender's move
             var defenderCard: Card?
             while (true){
-                defenderCard = getInput(defender, "to pick up the played cards") ?: return if (defenderIndex < players.lastIndex) defenderIndex+1 else 0
-                if (defenderCardIsPlayable(attackerCard!!, defenderCard!!)){
-                    playedCards.add(defenderCard!!)
+                defenderCard = getInput(defender, "to pick up the played cards")
+
+                if (defenderCard == null){
+                    playedCards.forEach { defender.hand.add(it) }
+                    playedCards.clear()
+                    return if (defenderIndex < players.lastIndex) defenderIndex+1 else 0
+                }
+
+                if (defenderCardIsPlayable(attackerCard!!, defenderCard)){
+                    playedCards.add(defenderCard)
                     defender.hand.remove(defenderCard)
                     break
                 }
+
                 println("${defender.name}, you can't cover $attackerCard with $defenderCard. Try again.")
             }
-
-            printTable(attacker, defender, playedCards)
         }
 
-        return 0
+        return defenderIndex
     }
 
     private fun play(){
@@ -173,6 +186,13 @@ class Game(private val players: Array<Player>) {
 
         var nextAttackerIndex = playRound(firstAttackerIndex)
         println("${players[nextAttackerIndex].name} IS THE NEXT ATTACKER")
+
+        players.forEach {
+            println("${it.name}'s current hand:")
+            it.showHand()
+            println()
+        }
+
 
     }
 
