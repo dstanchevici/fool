@@ -3,6 +3,7 @@ package fool
 import kotlin.random.Random
 
 class Game(private val players: Array<Player>) {
+    // Create deck and find the turn-up card. deck, turn-up, like players will be accessible throughout the class.
     private fun createDeck(): MutableList<Card>{
         val suits = listOf("S", "C", "H", "D")
         val deck = mutableListOf<Card>()
@@ -40,8 +41,8 @@ class Game(private val players: Array<Player>) {
         var attackerIndex: Int? = null
 
         for (i in players.indices){
-            val pTrumps = players[i].hand.filter { it.suit == trumpSuit }
-            pTrumps.forEach{
+            val playerTrumps = players[i].hand.filter { it.suit == trumpSuit }
+            playerTrumps.forEach{
                 if (it.rank < lowestTrump){
                     lowestTrump = it.rank
                     attackerIndex = i
@@ -90,8 +91,8 @@ class Game(private val players: Array<Player>) {
         println()
     }
 
-    private fun getInput(player: Player): Card? {
-        println("${player.name}, choose a card from your hand by entering its index number. Or type 's' to stop the attack. ")
+    private fun getInput(player: Player, additionalMessage: String = "to stop the attack"): Card? {
+        println("${player.name}, choose a card from your hand by entering its index number. Or type 's' $additionalMessage.")
         var inputString = readln()
 
         if (inputString.trim() == "s")
@@ -104,7 +105,7 @@ class Game(private val players: Array<Player>) {
         return player.hand[inputString.trim().toInt() - 1]
     }
 
-    private fun checkIfAttackerCardIsPlayable(attackerCard: Card, playedCards: MutableList<Card>): Boolean{
+    private fun attackerCardIsPlayable(attackerCard: Card, playedCards: MutableList<Card>): Boolean{
         if (playedCards.isEmpty())
             return true
         playedCards.forEach {
@@ -114,11 +115,11 @@ class Game(private val players: Array<Player>) {
         return false
     }
 
-    private fun checkIfDefenderCardIsPlayable(attackerCard: Card, defenderCard: Card): Boolean{
+    private fun defenderCardIsPlayable(attackerCard: Card, defenderCard: Card): Boolean{
         val trumpSuit = turnUp.suit
         return (
                 defenderCard.suit == attackerCard.suit && defenderCard.rank > attackerCard.rank ||
-                defenderCard.suit == trumpSuit && attackerCard.suit != trumpSuit
+                defenderCard.suit == trumpSuit
                 )
     }
 
@@ -129,33 +130,33 @@ class Game(private val players: Array<Player>) {
         val playedCards = mutableListOf<Card>()
 
         while (attacker.hand.isNotEmpty() || defender.hand.isNotEmpty()){
-            // Attacker's move
             printTable(attacker, defender, playedCards)
-            var attackerCard: Card? = getInput(attacker) ?: return if (attackerIndex < players.lastIndex) attackerIndex+1 else 0
-            var isAttackerCardPlayable = checkIfAttackerCardIsPlayable(attackerCard!!, playedCards)
 
-            while (isAttackerCardPlayable == false){
-                println("${attacker.name}, you can't attack with $attackerCard. Try again.")
-                attackerCard = getInput(attacker)?: return if (attackerIndex < players.lastIndex) attackerIndex+1 else 0
-                isAttackerCardPlayable = checkIfAttackerCardIsPlayable(attackerCard, playedCards)
+            // Attacker's move
+            var attackerCard: Card?
+            while (true){
+                attackerCard = getInput(attacker) ?: return defenderIndex
+                if (attackerCardIsPlayable(attackerCard!!, playedCards)){
+                    playedCards.add(attackerCard!!)
+                    attacker.hand.remove(attackerCard)
+                    break
+                }
+                println("You can't attack with $attackerCard. Try again.")
             }
 
-            playedCards.add(attackerCard!!)
-            attacker.hand.remove(attackerCard)
+            printTable(attacker, defender, playedCards)
 
             // Defender's move
-            printTable(attacker, defender, playedCards)
-            var defenderCard: Card? = getInput(defender) ?: return if (defenderIndex < players.lastIndex) defenderIndex+1 else 0
-            var isDefenderCardPlayable = checkIfDefenderCardIsPlayable(attackerCard, defenderCard!!)
-
-            while (isDefenderCardPlayable == false){
+            var defenderCard: Card?
+            while (true){
+                defenderCard = getInput(defender, "to pick up the played cards") ?: return if (defenderIndex < players.lastIndex) defenderIndex+1 else 0
+                if (defenderCardIsPlayable(attackerCard!!, defenderCard!!)){
+                    playedCards.add(defenderCard!!)
+                    defender.hand.remove(defenderCard)
+                    break
+                }
                 println("${defender.name}, you can't cover $attackerCard with $defenderCard. Try again.")
-                defenderCard = getInput(defender) ?: return if (defenderIndex < players.lastIndex) defenderIndex+1 else 0
-                isDefenderCardPlayable = checkIfDefenderCardIsPlayable(attackerCard, defenderCard)
             }
-
-            playedCards.add(defenderCard!!)
-            defender.hand.remove(defenderCard)
 
             printTable(attacker, defender, playedCards)
         }
@@ -163,7 +164,7 @@ class Game(private val players: Array<Player>) {
         return 0
     }
 
-    fun play(){
+    private fun play(){
         dealCards()
 
         var firstAttackerIndex = findFirstAttackerIndex()
@@ -171,6 +172,7 @@ class Game(private val players: Array<Player>) {
             firstAttackerIndex = Random.nextInt(0, players.size)
 
         var nextAttackerIndex = playRound(firstAttackerIndex)
+        println("${players[nextAttackerIndex].name} IS THE NEXT ATTACKER")
 
     }
 
